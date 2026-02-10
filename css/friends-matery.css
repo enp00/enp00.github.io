@@ -1,0 +1,370 @@
+/* ========== friends-matery.css (clean) ========== */
+
+/* 顶部标题 */
+.friends-hero{margin:16px 0 24px;text-align:center}
+.friends-hero h1{font-size:2rem;margin:0}
+
+/* 网格容器 */
+.friends-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
+}
+
+/* 卡片基础（白卡） */
+.friend-card{
+  position:relative;
+  padding:20px;
+  border-radius:20px;
+  border:1px solid var(--card-border,rgba(0,0,0,.06));
+  background:var(--card-bg,rgba(255,255,255,.6));
+  box-shadow:0 8px 26px rgba(0,0,0,.08);
+  backdrop-filter:saturate(1.05) blur(2px);
+  will-change:transform;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+/* 悬停动效 */
+.friend-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.12)}
+
+/* —— 布局：左图右文 + 按钮吸底 —— */
+.friend-card{
+  display:grid;
+  grid-template-columns:84px minmax(0,1fr);  /* 左头像 / 右内容 */
+  grid-template-rows:auto 1fr auto;          /* 标题 | 描述 | 按钮 */
+  column-gap:16px;
+  row-gap:8px;
+  align-items:start;
+  min-height:190px;
+}
+
+/* 头像 */
+.friend-card .avatar{
+  grid-column:1; grid-row:1 / span 3;
+  width:84px;height:84px;border-radius:50%;
+  border:3px solid transparent;object-fit:cover;align-self:center;
+}
+
+/* 右侧信息区 */
+.friend-card .meta{grid-column:2;grid-row:1 / span 2;min-width:0;display:flex;flex-direction:column}
+
+/* 标题更大 */
+.friend-card h3{
+  margin:0;
+  font-weight:800;
+  font-size:1.5rem;
+  line-height:1.25;
+  letter-spacing:.2px;
+}
+
+/* 分隔线（白卡下为浅灰，渐变模式下会自动变浅白） */
+.friend-card .title-line{
+  width:56px;height:3px;border-radius:2px;
+  background:rgba(0,0,0,.12);
+  margin:6px 0 8px;
+}
+
+/* 描述，两行省略 */
+.friend-card p{
+  margin:0;opacity:.9;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;white-space:normal;
+}
+
+/* 按钮吸底 */
+.friend-card .btn{
+  grid-column:2;grid-row:3;justify-self:center; /* 居中改为 center */
+  margin:0;border-radius:999px;
+  padding:.5rem .9rem;
+  border:1px solid rgba(0,0,0,.08);
+  font-weight:700;line-height:1;text-decoration:none;
+}
+.friend-card .btn:hover{box-shadow:0 6px 18px rgba(0,0,0,.12)}
+
+/* 键盘可见焦点 */
+.friend-card:focus-within{outline:3px solid rgba(59,130,246,.5);outline-offset:2px}
+
+/* 深色模式 */
+:root[theme='dark'] .friend-card{
+  --card-bg:rgba(18,18,18,.65);
+  --card-border:rgba(255,255,255,.08);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+/* 低动效偏好 */
+@media (prefers-reduced-motion: reduce){
+  .friend-card,.friend-card:hover{transform:none}
+}
+
+/* ===== 渐变彩卡（在容器 .friends-grid 上加 .gradient 即可启用） ===== */
+.friends-grid.gradient .friend-card{
+  border:none;background:transparent;color:#fff;box-shadow:0 16px 36px rgba(0,0,0,.25);
+}
+.friends-grid.gradient .friend-card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;z-index:0;
+  background:linear-gradient(135deg,var(--g1,#00c6ff),var(--g2,#0072ff));
+}
+.friends-grid.gradient .friend-card > *{position:relative;z-index:1}
+.friends-grid.gradient .title-line{background:rgba(255,255,255,.35)}
+.friends-grid.gradient .avatar{border-color:rgba(255,255,255,.75)}
+.friends-grid.gradient .btn{background:rgba(255,255,255,.95);color:#111;border-color:transparent}
+.friends-grid.gradient .btn:hover{box-shadow:0 10px 24px rgba(0,0,0,.28)}
+
+/* 6 组轮换渐变色（可按需改） */
+.friends-grid.gradient .friend-card:nth-child(6n+1){--g1:#00c6ff;--g2:#0072ff}
+.friends-grid.gradient .friend-card:nth-child(6n+2){--g1:#7f00ff;--g2:#e100ff}
+.friends-grid.gradient .friend-card:nth-child(6n+3){--g1:#f093fb;--g2:#f5576c}
+.friends-grid.gradient .friend-card:nth-child(6n+4){--g1:#36d1dc;--g2:#5b86e5}
+.friends-grid.gradient .friend-card:nth-child(6n+5){--g1:#4facfe;--g2:#00f2fe}
+.friends-grid.gradient .friend-card:nth-child(6n){--g1:#fa709a;--g2:#fee140}
+
+/* 小屏优化 */
+@media (max-width:480px){
+  .friend-card{grid-template-columns:72px 1fr;min-height:170px}
+  .friend-card .avatar{width:72px;height:72px}
+  .friend-card h3{font-size:1.12rem}
+}
+/* ========== friends-matery.css (clean) ========== */
+
+/* 顶部标题 */
+.friends-hero{margin:16px 0 24px;text-align:center}
+.friends-hero h1{font-size:2rem;margin:0}
+
+/* 网格容器 */
+.friends-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:18px;
+}
+
+/* 卡片基础（白卡） */
+.friend-card{
+  position:relative;
+  padding:20px;
+  border-radius:20px;
+  border:1px solid var(--card-border,rgba(0,0,0,.06));
+  background:var(--card-bg,rgba(255,255,255,.6));
+  box-shadow:0 8px 26px rgba(0,0,0,.08);
+  backdrop-filter:saturate(1.05) blur(2px);
+  will-change:transform;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+/* 悬停动效 */
+.friend-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.12)}
+
+/* —— 布局：左图右文 + 按钮吸底 —— */
+.friend-card{
+  display:grid;
+  grid-template-columns:84px minmax(0,1fr);  /* 左头像 / 右内容 */
+  grid-template-rows:auto 1fr auto;          /* 标题 | 描述 | 按钮 */
+  column-gap:16px;
+  row-gap:8px;
+  align-items:start;
+  min-height:190px;
+}
+
+/* 头像 */
+.friend-card .avatar{
+  grid-column:1; grid-row:1 / span 3;
+  width:84px;height:84px;border-radius:50%;
+  border:3px solid transparent;object-fit:cover;align-self:center;
+}
+
+/* 右侧信息区 */
+.friend-card .meta{grid-column:2;grid-row:1 / span 2;min-width:0;display:flex;flex-direction:column}
+
+/* 标题更大 */
+.friend-card h3{
+  margin:0;
+  font-weight:800;
+  font-size:1.25rem;
+  line-height:1.25;
+  letter-spacing:.2px;
+}
+
+/* 分隔线（白卡下为浅灰，渐变模式下会自动变浅白） */
+.friend-card .title-line{
+  width:56px;height:3px;border-radius:2px;
+  background:rgba(0,0,0,.12);
+  margin:6px 0 8px;
+}
+
+/* 描述，两行省略 */
+.friend-card p{
+  margin:0;opacity:.9;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;white-space:normal;
+}
+
+/* 按钮吸底 */
+.friend-card .btn{
+  grid-column:2;grid-row:3;justify-self:start; /* 居中改为 center */
+  margin:0;border-radius:999px;
+  padding:.5rem .9rem;
+  border:1px solid rgba(0,0,0,.08);
+  font-weight:700;line-height:1;text-decoration:none;
+}
+.friend-card .btn:hover{box-shadow:0 6px 18px rgba(0,0,0,.12)}
+
+/* 键盘可见焦点 */
+.friend-card:focus-within{outline:3px solid rgba(59,130,246,.5);outline-offset:2px}
+
+/* 深色模式 */
+:root[theme='dark'] .friend-card{
+  --card-bg:rgba(18,18,18,.65);
+  --card-border:rgba(255,255,255,.08);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+/* 低动效偏好 */
+@media (prefers-reduced-motion: reduce){
+  .friend-card,.friend-card:hover{transform:none}
+}
+
+/* ===== 渐变彩卡（在容器 .friends-grid 上加 .gradient 即可启用） ===== */
+.friends-grid.gradient .friend-card{
+  border:none;background:transparent;color:#fff;box-shadow:0 16px 36px rgba(0,0,0,.25);
+}
+.friends-grid.gradient .friend-card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;z-index:0;
+  background:linear-gradient(135deg,var(--g1,#00c6ff),var(--g2,#0072ff));
+}
+.friends-grid.gradient .friend-card > *{position:relative;z-index:1}
+.friends-grid.gradient .title-line{background:rgba(255,255,255,.35)}
+.friends-grid.gradient .avatar{border-color:rgba(255,255,255,.75)}
+.friends-grid.gradient .btn{background:rgba(255,255,255,.95);color:#111;border-color:transparent}
+.friends-grid.gradient .btn:hover{box-shadow:0 10px 24px rgba(0,0,0,.28)}
+
+/* 6 组轮换渐变色（可按需改） */
+.friends-grid.gradient .friend-card:nth-child(6n+1){--g1:#00c6ff;--g2:#0072ff}
+.friends-grid.gradient .friend-card:nth-child(6n+2){--g1:#7f00ff;--g2:#e100ff}
+.friends-grid.gradient .friend-card:nth-child(6n+3){--g1:#f093fb;--g2:#f5576c}
+.friends-grid.gradient .friend-card:nth-child(6n+4){--g1:#36d1dc;--g2:#5b86e5}
+.friends-grid.gradient .friend-card:nth-child(6n+5){--g1:#4facfe;--g2:#00f2fe}
+.friends-grid.gradient .friend-card:nth-child(6n){--g1:#fa709a;--g2:#fee140}
+
+/* 小屏优化 */
+@media (max-width:480px){
+  .friend-card{grid-template-columns:72px 1fr;min-height:170px}
+  .friend-card .avatar{width:72px;height:72px}
+  .friend-card h3{font-size:1.12rem}
+}
+
+
+/* —— 布局与间距微调 —— */
+.friends-grid{
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); /* 卡片更稳 */
+  gap:18px;
+}
+.friend-card{
+  padding:20px;
+  border-radius:20px;
+  display:flex;              /* 统一卡片高度 */
+  flex-direction:column;
+  min-height:190px;
+  will-change:transform;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  border:1px solid var(--card-border, rgba(0,0,0,.06));
+  box-shadow:0 8px 26px rgba(0,0,0,.08);
+}
+.friend-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 14px 36px rgba(0,0,0,.12);
+}
+
+/* —— 头像、标题、描述 —— */
+.friend-card .avatar{
+  width:80px; height:80px;
+  margin:2px 0 12px;
+  border-radius:50%;
+  border:3px solid transparent;
+}
+.friend-card h3{
+  margin:.1rem 0 .35rem;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.friend-card p{
+  margin:0 0 1rem;
+  opacity:.9;
+  /* 描述两行省略 */
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  white-space:normal;
+}
+
+/* —— 按钮强化，贴底 —— */
+.friend-card .btn{
+  margin-top:auto;
+  border-radius:999px;
+  padding:.5rem .9rem;
+  border:1px solid rgba(0,0,0,.08);
+  font-weight:700;
+}
+.friend-card .btn:hover{ box-shadow:0 6px 18px rgba(0,0,0,.12); }
+
+/* —— 可见焦点（键盘无障碍） —— */
+.friend-card:focus-within{
+  outline:3px solid rgba(59,130,246,.5);
+  outline-offset:2px;
+}
+
+/* —— 深色模式对比度 —— */
+:root[theme='dark'] .friend-card{
+  --card-bg:rgba(18,18,18,.65);
+  --card-border:rgba(255,255,255,.08);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+/* —— 低动效偏好 —— */
+@media (prefers-reduced-motion: reduce){
+  .friend-card, .friend-card:hover{ transform:none; }
+}
+
+/* =========================
+   可选：渐变彩卡风格（开关见第 3 部分）
+   ========================= */
+.friends-grid.gradient .friend-card{
+  position:relative;
+  border:none;
+  color:#fff;
+  background:transparent;
+  box-shadow:0 16px 36px rgba(0,0,0,.25);
+}
+.friends-grid.gradient .friend-card::before{
+  content:"";
+  position:absolute; inset:0; z-index:0; border-radius:inherit;
+  background:linear-gradient(135deg,var(--g1,#00c6ff),var(--g2,#0072ff));
+}
+.friends-grid.gradient .friend-card > *{ position:relative; z-index:1; }
+.friends-grid.gradient .avatar{ border-color:rgba(255,255,255,.7); }
+.friends-grid.gradient .btn{
+  background:rgba(255,255,255,.92);
+  color:#111; border-color:transparent;
+}
+.friends-grid.gradient .btn:hover{ box-shadow:0 10px 24px rgba(0,0,0,.28); }
+
+/* 自动配色（6色轮替），想要更个性可以自行改色值 */
+.friends-grid.gradient .friend-card:nth-child(6n+1){ --g1:#00c6ff; --g2:#0072ff; }
+.friends-grid.gradient .friend-card:nth-child(6n+2){ --g1:#7f00ff; --g2:#e100ff; }
+.friends-grid.gradient .friend-card:nth-child(6n+3){ --g1:#f093fb; --g2:#f5576c; }
+.friends-grid.gradient .friend-card:nth-child(6n+4){ --g1:#36d1dc; --g2:#5b86e5; }
+.friends-grid.gradient .friend-card:nth-child(6n+5){ --g1:#4facfe; --g2:#00f2fe; }
+.friends-grid.gradient .friend-card:nth-child(6n){   --g1:#fa709a; --g2:#fee140; }
+
+/* —— 按钮加长（覆盖前面的规则） —— */
+.friends-grid .friend-card .btn{
+  min-width: 250px;      /* 想再长一点就调成 180/200px */
+  padding: .6rem 1.2rem; /* 稍加粗手感 */
+  font-size: .95rem;
+  letter-spacing: .2px;
+}
+
+/* 小屏略收一点 */
+@media (max-width: 480px){
+  .friends-grid .friend-card .btn{ min-width: 140px; }
+}
+
