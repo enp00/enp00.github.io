@@ -1,0 +1,30 @@
+#footer {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
+  border-top: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#footer::before,
+#footer::after {
+  display: none;
+}
+
+#footer,
+#footer .copyright,
+#footer .framework-info,
+#footer .footer_custom_text,
+#footer a {
+  color: var(--light-grey);
+}
+
+#footer a:hover {
+  color: #ffffff;
+}
+
+#footer .footer-other {
+  background: transparent;
+}
