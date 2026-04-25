@@ -1,0 +1,442 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>初探 RE：从入门认知到 BUUCTF 简单题练习 | enp0</title><meta name="author" content="enp0,1342188940@qq.com"><meta name="copyright" content="enp0"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="记录我刚开始接触 CTF 逆向时的学习思路，包括 RE 基本概念、常见分析流程，以及 BUUCTF 几道简单逆向题的入门练习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初探 RE：从入门认知到 BUUCTF 简单题练习">
+<meta property="og:url" content="https://enp00.github.io/2026/04/25/chutan-re/index.html">
+<meta property="og:site_name" content="enp0">
+<meta property="og:description" content="记录我刚开始接触 CTF 逆向时的学习思路，包括 RE 基本概念、常见分析流程，以及 BUUCTF 几道简单逆向题的入门练习。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://enp00.github.io/img/xiangqing-clear.jpg">
+<meta property="article:published_time" content="2026-04-25T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-25T10:00:00.000Z">
+<meta property="article:author" content="enp0">
+<meta property="article:tag" content="BUUCTF">
+<meta property="article:tag" content="IDA">
+<meta property="article:tag" content="RE">
+<meta property="article:tag" content="Reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://enp00.github.io/img/xiangqing-clear.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "初探 RE：从入门认知到 BUUCTF 简单题练习",
+  "url": "https://enp00.github.io/2026/04/25/chutan-re/",
+  "image": "https://enp00.github.io/img/xiangqing-clear.jpg",
+  "datePublished": "2026-04-25T10:00:00.000Z",
+  "dateModified": "2026-04-25T10:00:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "enp0",
+      "url": "https://enp00.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon-96.png"><link rel="canonical" href="https://enp00.github.io/2026/04/25/chutan-re/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '初探 RE：从入门认知到 BUUCTF 简单题练习',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/footer-glass.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (false) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div class="bg-animation" id="web_bg" style="background-image: url(/img/xiangqing-clear.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/loading.gif" data-original="/img/touxiang-320.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/xiangqing-clear.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">enp0</span></a><a class="nav-page-title" href="/"><span class="site-name">初探 RE：从入门认知到 BUUCTF 简单题练习</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">初探 RE：从入门认知到 BUUCTF 简单题练习</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-25T10:00:00.000Z" title="发表于 2026-04-25 18:00:00">2026-04-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-25T10:00:00.000Z" title="更新于 2026-04-25 18:00:00">2026-04-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CTF/">CTF</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CTF/Reverse/">Reverse</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="初探-RE：从入门认知到-BUUCTF-简单题练习"><a href="#初探-RE：从入门认知到-BUUCTF-简单题练习" class="headerlink" title="初探 RE：从入门认知到 BUUCTF 简单题练习"></a>初探 RE：从入门认知到 BUUCTF 简单题练习</h1><p>这篇文章记录我刚开始接触 CTF 逆向时的学习过程。第一天主要是了解 RE 到底在做什么、常见工具和大致解题流程；第二天开始上手刷一些 BUUCTF 的简单题，在做题里熟悉最基础的分析方法。</p>
+<p>目前我的想法也比较明确：先通过题目建立直觉，遇到不会的知识点再回头补，这样学起来更有目标感。</p>
+<h2 id="Day1"><a href="#Day1" class="headerlink" title="Day1"></a>Day1</h2><p>第一天没有急着做题，主要先梳理方向，尽量对 CTF 逆向建立一个整体认识。</p>
+<h3 id="逆向学习框架"><a href="#逆向学习框架" class="headerlink" title="逆向学习框架"></a>逆向学习框架</h3><p>我参考了一篇系统性入门文章，感觉下面这句话很适合初学阶段：</p>
+<p>在逆向工程领域知识碎片化的今天，强大的自学能力和持之以恒的精神尤为关键。教程可以帮助我们建立方向感，但真正的提升还是要靠持续练习。</p>
+<p><img src="/img/loading.gif" data-original="https://i-blog.csdnimg.cn/direct/96b0669e98f94bc7826ca27a69dd91ff.png" alt="RE 学习框架"></p>
+<h3 id="CTF-中的逆向工程在做什么"><a href="#CTF-中的逆向工程在做什么" class="headerlink" title="CTF 中的逆向工程在做什么"></a>CTF 中的逆向工程在做什么</h3><p>CTF 里的逆向工程，核心目标通常是从题目给出的程序或文件中找出隐藏的 <code>flag</code>。</p>
+<p>如果用一个更形象的比喻来理解：</p>
+<ul>
+<li>出题人像厨师，把“配料”通过一系列加工步骤做成成品。</li>
+<li>做逆向的人则需要通过观察程序行为、分析代码逻辑、还原处理流程，最终推导出被藏起来的核心信息，也就是 <code>flag</code>。</li>
+</ul>
+<h3 id="为什么需要逆向工具"><a href="#为什么需要逆向工具" class="headerlink" title="为什么需要逆向工具"></a>为什么需要逆向工具</h3><p>程序从高级语言编译到二进制之后，很多信息都会丢失，比如：</p>
+<ul>
+<li>注释</li>
+<li>变量名</li>
+<li>函数名</li>
+<li>原始代码结构</li>
+</ul>
+<p>因此我们通常没法把程序完整还原成最初的高级语言源码，只能借助逆向工具把它转换成更容易分析的汇编代码或伪代码，再继续往下看逻辑。</p>
+<p>我目前主要使用的工具还是 <code>IDA</code>。</p>
+<h3 id="常见逆向类型"><a href="#常见逆向类型" class="headerlink" title="常见逆向类型"></a>常见逆向类型</h3><p>拿到一道题后，第一步通常是先判断文件类型。最直观的方法是看后缀，但也不能完全相信后缀，因为有些题会故意伪装。</p>
+<table>
+<thead>
+<tr>
+<th>逆向类型</th>
+<th>核心文件格式</th>
+<th>常见文件后缀 &#x2F; 类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Windows 逆向</td>
+<td>PE</td>
+<td><code>.exe</code>、<code>.dll</code>、<code>.sys</code></td>
+<td>Windows 可执行文件大多是 PE 格式。</td>
+</tr>
+<tr>
+<td>Linux 逆向</td>
+<td>ELF</td>
+<td>无固定后缀、<code>.so</code>、<code>.ko</code></td>
+<td>Linux 下可执行文件通常没有固定后缀。</td>
+</tr>
+<tr>
+<td>Android 逆向</td>
+<td>DEX、APK、ELF</td>
+<td><code>.apk</code>、<code>.dex</code>、<code>.so</code></td>
+<td>APK 本质上是压缩包，内部可能同时包含 Java 层和 Native 层内容。</td>
+</tr>
+</tbody></table>
+<p>看完这些基础内容之后，我给自己定的路线是：</p>
+<ol>
+<li>先从 Windows 逆向入手。</li>
+<li>再逐步过渡到 Linux 逆向。</li>
+<li>前两部分打一些基础之后，再去接触 Android 逆向。</li>
+</ol>
+<h3 id="逆向题常见解题流程"><a href="#逆向题常见解题流程" class="headerlink" title="逆向题常见解题流程"></a>逆向题常见解题流程</h3><p><img src="/img/loading.gif" data-original="https://i-blog.csdnimg.cn/direct/826ef55e56114510b09b2cb4995d43b9.png" alt="RE 解题流程"></p>
+<h4 id="1-判断文件类型"><a href="#1-判断文件类型" class="headerlink" title="1. 判断文件类型"></a>1. 判断文件类型</h4><p>这一阶段的目标是先确认题目文件的格式，例如 <code>ELF</code>、<code>PE</code>、<code>Python</code> 字节码等，方便后续选择分析工具和环境。</p>
+<p>常见方法：</p>
+<ul>
+<li>使用 <code>file</code> 命令识别文件类型。</li>
+<li>结合题目名称、文件名、附件说明一起判断。</li>
+<li>注意后缀名可能是伪装的，不能只看表面。</li>
+</ul>
+<h4 id="2-静态分析"><a href="#2-静态分析" class="headerlink" title="2. 静态分析"></a>2. 静态分析</h4><p>静态分析是在不运行程序的情况下，通过 <code>IDA</code>、<code>Ghidra</code> 等工具分析程序逻辑。</p>
+<p>这一阶段通常会做这些事情：</p>
+<ul>
+<li>查字符串</li>
+<li>看关键函数</li>
+<li>判断是否存在加壳、花指令、反调试</li>
+<li>分析是否有明显的加密或校验逻辑</li>
+</ul>
+<h4 id="3-脱壳与修复函数"><a href="#3-脱壳与修复函数" class="headerlink" title="3. 脱壳与修复函数"></a>3. 脱壳与修复函数</h4><p>如果程序有壳，通常要先脱壳。</p>
+<ul>
+<li>如果是常见 <code>UPX</code> 壳，可以直接用 <code>upx -d 文件名</code>。</li>
+<li>如果是魔改壳，就可能需要手动调试，找到 <code>OEP</code> 再脱壳。</li>
+</ul>
+<p>脱壳之后，有时还要修复函数结构，不然反汇编和伪代码可能都比较混乱，不方便继续分析。</p>
+<h4 id="4-厘清逻辑"><a href="#4-厘清逻辑" class="headerlink" title="4. 厘清逻辑"></a>4. 厘清逻辑</h4><p>把程序主流程捋顺之后，题目大致会落到几种情况里：</p>
+<ul>
+<li>直接显示 <code>flag</code><br>这种题可能能直接从字符串或关键逻辑里看到答案。</li>
+<li>存在加密逻辑<br>这时就需要逆向算法，再写脚本还原明文。</li>
+<li>静态分析受阻<br>如果变量是运行时生成的，或者代码有动态行为，就需要进一步动态调试。</li>
+</ul>
+<h4 id="5-动态调试"><a href="#5-动态调试" class="headerlink" title="5. 动态调试"></a>5. 动态调试</h4><p>动态调试就是把程序跑起来，用调试器跟踪关键位置，比如：</p>
+<ul>
+<li>验证函数</li>
+<li>加密函数</li>
+<li>字符串处理函数</li>
+</ul>
+<p>常用工具包括：</p>
+<ul>
+<li><code>IDA</code> 动态调试</li>
+<li><code>x64dbg</code></li>
+<li><code>gdb</code></li>
+</ul>
+<p>通过断点、单步、查看寄存器和内存，往往能更直观地看到数据是怎么变化的。</p>
+<h4 id="6-写脚本解密"><a href="#6-写脚本解密" class="headerlink" title="6. 写脚本解密"></a>6. 写脚本解密</h4><p>如果题目最终落在某种编码或加密逻辑上，通常就要写脚本。</p>
+<p>例如，若程序逻辑是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">input</span>[i] ^ <span class="number">0x12</span> == cipher[i]</span><br></pre></td></tr></table></figure>
+
+<p>那就可以直接逆回来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag = <span class="built_in">bytes</span>([c ^ <span class="number">0x12</span> <span class="keyword">for</span> c <span class="keyword">in</span> cipher])</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-解出-Flag"><a href="#7-解出-Flag" class="headerlink" title="7. 解出 Flag"></a>7. 解出 Flag</h4><p>最终目标其实很明确，就是通过静态分析、动态调试或者脚本还原，把题目里的 <code>flag</code> 找出来。</p>
+<p>看完几篇入门文章之后，我对 RE 已经有了一个比较基础的认识。接下来我更想直接做题，在题目里学习不会的知识点。</p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/penetr4t10n/p/19210637">CTF中的逆向Re：零基础系统性入门教程-1 - Penetr4t10n - 博客园</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/penetr4t10n/p/19210639">CTF逆向Re：零基础系统性入门教程-2-工具 - Penetr4t10n - 博客园</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/penetr4t10n/p/19210638">CTF逆向Re：零基础系统性入门教程-3-解题流程 - Penetr4t10n - 博客园</a></li>
+</ul>
+<h2 id="Day2"><a href="#Day2" class="headerlink" title="Day2"></a>Day2</h2><p>第二天开始正式刷题，顺手练一练最基础的静态分析和简单脚本还原。</p>
+<h3 id="UPX-脱壳"><a href="#UPX-脱壳" class="headerlink" title="UPX 脱壳"></a>UPX 脱壳</h3><p>先记录一个最常见的脱壳命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upx -d <span class="string">&quot;E:\3 pwn题文件\rebuuctf\93c43c5c-3d4d-4d17-a9a1-4ffb65ebb2fb\新年快乐.exe&quot;</span> -o 1.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425161403144.png" alt="UPX 脱壳"></p>
+<h3 id="刷题记录"><a href="#刷题记录" class="headerlink" title="刷题记录"></a>刷题记录</h3><h4 id="reverse1"><a href="#reverse1" class="headerlink" title="reverse1"></a>reverse1</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425150552814.png" alt="reverse1"></p>
+<p>这题的核心就是字符串替换，把 ASCII 码为 <code>111</code> 的字符替换成 <code>48</code>，也就是把 <code>o</code> 替换成 <code>0</code>。</p>
+<p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425150810682.png" alt="reverse1 分析 1"></p>
+<p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425150823822.png" alt="reverse1 分析 2"></p>
+<p>最后得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;hell0_w0rld&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="reverse2"><a href="#reverse2" class="headerlink" title="reverse2"></a>reverse2</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425151428664.png" alt="reverse2"></p>
+<p>这题同样是字符串替换，把 ASCII 码为 <code>105</code> 和 <code>114</code> 的字符替换成 <code>49</code>，也就是把 <code>i</code> 和 <code>r</code> 替换成 <code>1</code>。</p>
+<p>最终可以得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;hack1ng_fo1_fun&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="内涵的软件"><a href="#内涵的软件" class="headerlink" title="内涵的软件"></a>内涵的软件</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425153640688.png" alt="内涵的软件"></p>
+<p>进去之后就能看到明文内容，我一开始尝试了几种解码方式，但最后发现只需要把 <code>DBAPP</code> 换成 <code>flag</code> 即可。</p>
+<p>最终结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;49d3c93df25caad81232130f3d2ebfad&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="新年快乐"><a href="#新年快乐" class="headerlink" title="新年快乐"></a>新年快乐</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425160517873.png" alt="新年快乐 1"></p>
+<p>这题是 <code>UPX</code> 壳，先脱壳。</p>
+<p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425161430045.png" alt="新年快乐 2"></p>
+<p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425161352901.png" alt="新年快乐 3"></p>
+<p>脱壳之后就能直接看到 <code>flag</code>，补上格式即可：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;HappyNewYear!&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="xor"><a href="#xor" class="headerlink" title="xor"></a>xor</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425164011895.png" alt="xor"></p>
+<p>这题是经典异或逻辑。题目数据是逐位和前一个字符异或后的结果，因此只要按照逆过程还原，就能恢复原始字符串。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">target = [</span><br><span class="line">    <span class="number">0x66</span>, <span class="number">0x0A</span>, <span class="number">0x6B</span>, <span class="number">0x0C</span>, <span class="number">0x77</span>, <span class="number">0x26</span>, <span class="number">0x4F</span>, <span class="number">0x2E</span>, <span class="number">0x40</span>, <span class="number">0x11</span>, <span class="number">0x78</span>,</span><br><span class="line">    <span class="number">0x0D</span>, <span class="number">0x5A</span>, <span class="number">0x3B</span>, <span class="number">0x55</span>, <span class="number">0x11</span>, <span class="number">0x70</span>, <span class="number">0x19</span>, <span class="number">0x46</span>, <span class="number">0x1F</span>, <span class="number">0x76</span>, <span class="number">0x22</span>,</span><br><span class="line">    <span class="number">0x4D</span>, <span class="number">0x23</span>, <span class="number">0x44</span>, <span class="number">0x0E</span>, <span class="number">0x67</span>, <span class="number">0x06</span>, <span class="number">0x68</span>, <span class="number">0x0F</span>, <span class="number">0x47</span>, <span class="number">0x32</span>, <span class="number">0x4F</span>,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">recover_flag</span>(<span class="params">data</span>):</span><br><span class="line">    plain = [data[<span class="number">0</span>]]</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="built_in">len</span>(data)):</span><br><span class="line">        plain.append(data[i] ^ data[i - <span class="number">1</span>])</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">bytes</span>(plain).decode()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="built_in">print</span>(recover_flag(target))</span><br></pre></td></tr></table></figure>
+
+<p>得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;QianQiuWanDai_YiTongJiangHu&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="reverse3"><a href="#reverse3" class="headerlink" title="reverse3"></a>reverse3</h4><p><img src="/img/loading.gif" data-original="https://cdn.jsdelivr.net/gh/bairan00/Picture-bed/Picture-bed/20260425172851267.png" alt="reverse3"></p>
+<p>这题的核心逻辑在主函数 <code>_main_0</code> 中。程序先读取输入，然后调用一个函数对输入进行处理。通过分析可以发现，这个函数内部用到了典型的 Base64 字符表：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=</span><br></pre></td></tr></table></figure>
+
+<p>所以可以判断这一步是在做 Base64 编码。</p>
+<p>随后程序把编码结果复制到目标数组，再额外执行一轮变换：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Destination[j] += j;</span><br></pre></td></tr></table></figure>
+
+<p>也就是让每个字符的 ASCII 值都加上自己的下标。最后程序拿结果去和常量字符串：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e3nifIH9b_C@n@dH</span><br></pre></td></tr></table></figure>
+
+<p>进行比较。</p>
+<p>因此逆向思路就是：</p>
+<ol>
+<li>先把目标字符串每一位减去对应下标，恢复出原始 Base64 字符串。</li>
+<li>再对恢复后的 Base64 字符串解码，得到原始输入。</li>
+</ol>
+<p>还原脚本如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">target = <span class="string">&quot;e3nifIH9b_C@n@dH&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 逆掉 Destination[j] += j</span></span><br><span class="line">b64 = <span class="string">&quot;&quot;</span>.join(<span class="built_in">chr</span>(<span class="built_in">ord</span>(c) - i) <span class="keyword">for</span> i, c <span class="keyword">in</span> <span class="built_in">enumerate</span>(target))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Base64 解码得到原始输入</span></span><br><span class="line">flag = base64.b64decode(b64).decode()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;base64:&quot;</span>, b64)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;flag:&quot;</span>, flag)</span><br></pre></td></tr></table></figure>
+
+<p>最终得到：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;i_l0ve_you&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这两天的学习下来，我对 RE 的整体流程已经有了一个初步认识：</p>
+<ul>
+<li>先判断文件类型</li>
+<li>再做静态分析</li>
+<li>必要时脱壳、修复函数</li>
+<li>遇到复杂逻辑就调试或写脚本还原</li>
+</ul>
+<p>现在这个阶段，我还是会继续以刷简单题为主，把字符串处理、编码转换、异或、简单加密这些基础题型先打熟。等这些内容更熟练一些之后，再继续往更复杂的 Windows 和 Linux 逆向题里走。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://enp00.github.io">enp0</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://enp00.github.io/2026/04/25/chutan-re/">https://enp00.github.io/2026/04/25/chutan-re/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://enp00.github.io" target="_blank">enp0</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/RE/">RE</a><a class="post-meta__tags" href="/tags/Reverse/">Reverse</a><a class="post-meta__tags" href="/tags/BUUCTF/">BUUCTF</a><a class="post-meta__tags" href="/tags/IDA/">IDA</a></div><div class="post-share"><div class="social-share" data-image="/img/xiangqing-clear.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/04/23/awdp-pwn/" title="AWDP-PWN 赛前速成"><img class="cover" src="/img/loading.gif" data-original="/img/xiangqing-clear.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">AWDP-PWN 赛前速成</div></div><div class="info-2"><div class="info-item-1">awdp-pwn赛前速成小记没打过AWDP，因为第一次打线下赛，所以准备写个笔记记录一下，完事之后在准备在补点笔记。 Web我还没有学，只记录了pwn AWDP一般分为两个板块，Break（自己的payload打通）和Fix（让主办方的payload打不通） patch：指防御。 checker：指在部署题目的时候，检查选手提交的补丁（patch文件）是否符合预设条件的专门脚本。常见的非常规防御的例子就是把二进制文件直接删除、把关键漏洞语句直接删除、在堆利用的题目中将free语句直接删除等，checker就是用于检查选手是否存在这些非常规补丁的。它主要是通过和提交的二进制文件通信来判断这个二进制文件是否有异常。 打补丁有下面2个基本原则： 1.不改变程序的正常运行流程。 2.能够防御想要防御的攻击 漏洞加固技巧在AWDP中每个选手会收到一个附件，类似两个ctf题，只是一个修一个打，不同队伍不互通，有的赛制修是累加得分，有的就是固定分数，根据不同的赛制来得分，但本质上还是ctf赛题 patch-PWN使用：patch就是通过修改漏洞程序的漏洞汇编代码从而防止其他选手进行漏洞利用，不...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/img/touxiang-320.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">enp0</div><div class="author-info-description">enp0 的个人博客，记录 CTF、Pwn、AWDP、二进制漏洞分析与漏洞修补学习笔记。</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/enp00"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1342188940@qq.com" target="_blank" title="Email"><i class="fas fa-envelope-open-text"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">在时光的流转中，记录每一瞬的思考与感悟。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9D%E6%8E%A2-RE%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E8%AE%A4%E7%9F%A5%E5%88%B0-BUUCTF-%E7%AE%80%E5%8D%95%E9%A2%98%E7%BB%83%E4%B9%A0"><span class="toc-text">初探 RE：从入门认知到 BUUCTF 简单题练习</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Day1"><span class="toc-text">Day1</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6"><span class="toc-text">逆向学习框架</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CTF-%E4%B8%AD%E7%9A%84%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%9C%A8%E5%81%9A%E4%BB%80%E4%B9%88"><span class="toc-text">CTF 中的逆向工程在做什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%80%86%E5%90%91%E5%B7%A5%E5%85%B7"><span class="toc-text">为什么需要逆向工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%80%86%E5%90%91%E7%B1%BB%E5%9E%8B"><span class="toc-text">常见逆向类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%86%E5%90%91%E9%A2%98%E5%B8%B8%E8%A7%81%E8%A7%A3%E9%A2%98%E6%B5%81%E7%A8%8B"><span class="toc-text">逆向题常见解题流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%88%A4%E6%96%AD%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-text">1. 判断文件类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="toc-text">2. 静态分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%84%B1%E5%A3%B3%E4%B8%8E%E4%BF%AE%E5%A4%8D%E5%87%BD%E6%95%B0"><span class="toc-text">3. 脱壳与修复函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E5%8E%98%E6%B8%85%E9%80%BB%E8%BE%91"><span class="toc-text">4. 厘清逻辑</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="toc-text">5. 动态调试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-%E5%86%99%E8%84%9A%E6%9C%AC%E8%A7%A3%E5%AF%86"><span class="toc-text">6. 写脚本解密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-%E8%A7%A3%E5%87%BA-Flag"><span class="toc-text">7. 解出 Flag</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">参考文章</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Day2"><span class="toc-text">Day2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#UPX-%E8%84%B1%E5%A3%B3"><span class="toc-text">UPX 脱壳</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="toc-text">刷题记录</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#reverse1"><span class="toc-text">reverse1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#reverse2"><span class="toc-text">reverse2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%B6%B5%E7%9A%84%E8%BD%AF%E4%BB%B6"><span class="toc-text">内涵的软件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%B9%B4%E5%BF%AB%E4%B9%90"><span class="toc-text">新年快乐</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xor"><span class="toc-text">xor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#reverse3"><span class="toc-text">reverse3</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/04/25/chutan-re/" title="初探 RE：从入门认知到 BUUCTF 简单题练习"><img src="/img/loading.gif" data-original="/img/xiangqing-clear.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="初探 RE：从入门认知到 BUUCTF 简单题练习"/></a><div class="content"><a class="title" href="/2026/04/25/chutan-re/" title="初探 RE：从入门认知到 BUUCTF 简单题练习">初探 RE：从入门认知到 BUUCTF 简单题练习</a><time datetime="2026-04-25T10:00:00.000Z" title="发表于 2026-04-25 18:00:00">2026-04-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/04/23/awdp-pwn/" title="AWDP-PWN 赛前速成"><img src="/img/loading.gif" data-original="/img/xiangqing-clear.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AWDP-PWN 赛前速成"/></a><div class="content"><a class="title" href="/2026/04/23/awdp-pwn/" title="AWDP-PWN 赛前速成">AWDP-PWN 赛前速成</a><time datetime="2026-04-23T11:00:00.000Z" title="发表于 2026-04-23 19:00:00">2026-04-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/02/10/hello-world/" title="Hello World"><img src="/img/loading.gif" data-original="/img/xiangqing-clear.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2026/02/10/hello-world/" title="Hello World">Hello World</a><time datetime="2026-02-10T09:27:05.910Z" title="发表于 2026-02-10 17:27:05">2026-02-10</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By enp0</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+  const getUtterancesTheme = theme => theme === 'dark' ? 'photon-dark' : 'github-light'
+
+  const loadUtterances = (el = document, key) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyUtterances = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const config = {
+      src: 'https://utteranc.es/client.js',
+      repo: 'enp00/enp00.github.io',
+      theme: getUtterancesTheme(document.documentElement.getAttribute('data-theme')),
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      'issue-term': isShuoshuo ? key : (option && option['issue-term']) || 'pathname'
+    }
+
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => ele.setAttribute(key, value))
+    el.querySelector('#utterances-wrap').appendChild(ele)
+  }
+
+  const changeUtterancesTheme = theme => {
+    const iframe = document.querySelector('#utterances-wrap iframe')
+    if (iframe) {
+      const message = {
+        type: 'set-theme',
+        theme: getUtterancesTheme(theme)
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeUtterancesTheme, 'utterances')
+
+  if (isShuoshuo) {
+    'Utterances' === 'Utterances'
+      ? window.shuoshuoComment = { loadComment: loadUtterances }
+      : window.loadOtherComment = loadUtterances
+    return
+  }
+  
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><div class="aplayer no-destroy" data-id="60198" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true" data-theme="#3b70fc" data-preload="auto" data-volume="0.7" data-order="random" data-list-folded="true"></div><script src="/js/title-switch.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/metingjs/dist/Meting.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
