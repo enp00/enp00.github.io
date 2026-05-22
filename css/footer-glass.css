@@ -1,3 +1,65 @@
+#video-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -10;
+  pointer-events: none;
+}
+
+:root {
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --sidebar-bg: rgba(255, 255, 255, 0.72);
+}
+
+html[data-theme="dark"] {
+  --card-bg: rgba(7, 16, 32, 0.68);
+  --sidebar-bg: rgba(7, 16, 32, 0.68);
+}
+
+body,
+#page-header,
+#page-header::before,
+#footer::before {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+#page-header {
+  background-color: transparent !important;
+}
+
+#recent-posts > .recent-post-item,
+.layout > div:first-child:not(.recent-posts),
+#aside-content .card-widget,
+#archive,
+#page,
+#post,
+#category,
+#tag {
+  background: var(--card-bg) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+#recent-posts > .recent-post-item,
+#aside-content .card-widget,
+.layout > div:first-child:not(.recent-posts) {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+#footer {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
+  border-top: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 #footer {
   background: transparent !important;
   background-color: transparent !important;
@@ -27,4 +89,20 @@
 
 #footer .footer-other {
   background: transparent;
+}
+
+#page-header.nav-fixed #nav,
+#page-header.not-top-img #nav,
+#page-header.post-bg #nav,
+#page-header.full_page #nav {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark"] #page-header.nav-fixed #nav,
+html[data-theme="dark"] #page-header.not-top-img #nav,
+html[data-theme="dark"] #page-header.post-bg #nav,
+html[data-theme="dark"] #page-header.full_page #nav {
+  background: rgba(8, 15, 28, 0.28);
 }
