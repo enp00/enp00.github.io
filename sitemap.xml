@@ -56,15 +56,6 @@
   </url>
   
   <url>
-    <loc>https://enp00.github.io/2026/04/25/chutan-re/</loc>
-    
-    <lastmod>2026-04-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://enp00.github.io/2026/04/23/awdp-pwn/</loc>
     
     <lastmod>2026-04-23</lastmod>
@@ -174,34 +165,6 @@
     <priority>0.2</priority>
   </url>
   
-  <url>
-    <loc>https://enp00.github.io/tags/RE/</loc>
-    <lastmod>2026-07-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://enp00.github.io/tags/Reverse/</loc>
-    <lastmod>2026-07-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://enp00.github.io/tags/BUUCTF/</loc>
-    <lastmod>2026-07-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://enp00.github.io/tags/IDA/</loc>
-    <lastmod>2026-07-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
 
   
   <url>
@@ -227,13 +190,6 @@
   
   <url>
     <loc>https://enp00.github.io/categories/CTF/AWDP/</loc>
-    <lastmod>2026-07-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://enp00.github.io/categories/CTF/Reverse/</loc>
     <lastmod>2026-07-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
