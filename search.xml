@@ -24,7 +24,7 @@
             
             <tag> MIPS </tag>
             
-            <tag> Pwn </tag>
+            <tag> PWN </tag>
             
             <tag> Assembly </tag>
             
@@ -84,6 +84,12 @@
       </categories>
       
       
+        <tags>
+            
+            <tag> PWN </tag>
+            
+        </tags>
+      
     </entry>
     
     
@@ -102,6 +108,12 @@
           
       </categories>
       
+      
+        <tags>
+            
+            <tag> PWN </tag>
+            
+        </tags>
       
     </entry>
     
